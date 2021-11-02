@@ -2,10 +2,8 @@ import pygame
 import random
 
 class Block():
-
     
     colors_list = [(0, 255, 0), (255, 0, 0), (0, 0, 255), (255, 128, 0), (255, 0, 127), (51, 255, 255), (153, 51, 255)]
-
 
     def __init__(self, x, y):
         self.shape = random.randrange(7)
