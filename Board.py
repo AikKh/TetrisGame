@@ -62,7 +62,6 @@ class Board:
 
         return lines
 
-
     def allBlocksMoveDown(self, lines):
         if lines != []:
             for block in self.obj_blocks_list:

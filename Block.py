@@ -13,7 +13,6 @@ class Block():
         self.color = self.colors_list[random.randrange(7)]
         self.state = 0
 
-
     def blockMaker(self, x, y):
         shape0 = [[(x, y), (x - 1, y), (x, y - 1), (x, y - 2)],
                   [(x, y), (x, y - 1), (x + 1, y), (x + 2, y)],
