@@ -9,9 +9,13 @@ class Board:
     touch_block = False
     surface = None
 
+    width = 560
+    height = 800
+
     obj_blocks_list = []
 
     game_over = False
+    game_restart = False
 
     def fullLineCheck(self):
     
@@ -71,18 +75,47 @@ class Board:
                             block.move(self.surface, 2)
                         break
 
+    def surfacePurifier(self):
+        self.surface.fill((0, 0, 0))
+        self.obj_blocks_list = []
+
+    def restart(self):
+        my_font = pygame.font.SysFont('times new roman', 49)
+        game_over_surface = my_font.render('Game over', True, (255, 255, 255))
+        game_over_rect = game_over_surface.get_rect()
+        game_over2_surface = my_font.render('Press Space or Q', True, (255, 255, 255))
+        game_over2_rect = game_over_surface.get_rect()
+        game_over_rect.midtop = (self.width/2, self.width/4)
+        game_over2_rect.midtop = (self.width/2 - 80, self.width/4 + 60)
+        self.surface.fill(self.black)
+        self.surface.blit(game_over_surface, game_over_rect)
+        self.surface.blit(game_over2_surface, game_over2_rect)
+        pygame.display.flip()
+
     def main(self):
 
         pygame.init()
-        self.surface = pygame.display.set_mode((560, 800))
+        self.surface = pygame.display.set_mode((self.width, self.height))
         self.surface.fill(self.black)
         pygame.display.set_caption("Tetris game")
 
-        fps = 7
+        fps = 14
         clock = pygame.time.Clock()
+        frame_count = 0
 
-        
+
         while not self.game_over:
+
+            while self.game_restart:
+                self.restart()
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_SPACE:
+                            self.surfacePurifier()
+                            self.game_restart = False
+                        elif event.key == pygame.K_q:
+                            self.game_restart = False
+                            self.game_over = True
 
             lines = self.linesToRemove()
 
@@ -91,7 +124,8 @@ class Board:
             for block in self.obj_blocks_list:
                 for cor in block._cors:
                     if cor[1] < 0:
-                        self.game_over = True
+                        self.game_restart = True
+                        continue
 
             self.touch_block = False
 
@@ -102,8 +136,14 @@ class Board:
 
             while not self.touch_block:
 
+                pygame.display.flip()
+                clock.tick(fps) 
 
                 if new_block.cantMove() or new_block.touchBlock(self.obj_blocks_list):
+
+                    for block in self.obj_blocks_list:
+                        for x, y in block._cors:
+                            pygame.draw.rect(self.surface, block.color, [x  * 40, y * 40, 39, 39])
                       
                     self.obj_blocks_list.append(new_block)
                     self.touch_block = True
@@ -115,25 +155,33 @@ class Board:
                         pygame.quit()
                         sys.exit()
 
-                
                     if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_LEFT:
-                            if new_block.nearBlockTouch(self.obj_blocks_list, -1):
-                                continue
-                            new_block.move(self.surface, 3)
-                        elif event.key == pygame.K_RIGHT:
-                            if new_block.nearBlockTouch(self.obj_blocks_list, 1):
-                                continue
-                            new_block.move(self.surface, 1)
-                        elif event.key == pygame.K_SPACE:
+                        if event.key == pygame.K_SPACE:
                             new_block.cutBlocks(self.surface)
                             if not new_block.changeState(self.obj_blocks_list):
                                 new_block.drawBlocks(self.surface)
 
+                
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        if new_block.nearBlockTouch(self.obj_blocks_list, -1):
+                            pass
+                        else:
+                            new_block.move(self.surface, 3)
+                    elif event.key == pygame.K_RIGHT:
+                        if new_block.nearBlockTouch(self.obj_blocks_list, 1):
+                            pass
+                        else:
+                            new_block.move(self.surface, 1)
 
-                new_block.move(self.surface, direction)
-                pygame.display.flip()
-                clock.tick(fps) 
+                
+                    
+
+                frame_count += 1
+                if frame_count == fps/7:
+                    new_block.move(self.surface, direction)
+                    frame_count = 0
+                
 
 game = Board()
 game.main()
