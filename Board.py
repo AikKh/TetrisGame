@@ -33,7 +33,7 @@ class Board:
             minY = 0
 
         full_liens = []
-
+#eeeee
         for i in range(minY, maxY):
             x_array = []
             for block in self.obj_blocks_list:
