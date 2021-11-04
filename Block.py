@@ -125,7 +125,7 @@ class Block():
         self.state += 1
         new_cors = self.blockMaker(self.x, self.y)
         for co_x, co_y in new_cors:
-            if co_x >= 14 or co_x <= -1:
+            if co_x >= 14 or co_x <= -1 or co_y >= 19:
                 self.state -= 1
                 self._cors.clear()
                 new_cors = self.blockMaker(self.x, self.y)

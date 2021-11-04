@@ -16,6 +16,7 @@ class Board:
 
     game_over = False
     game_restart = False
+    pause = False
 
     def fullLineCheck(self):
     
@@ -92,6 +93,26 @@ class Board:
         self.surface.blit(game_over2_surface, game_over2_rect)
         pygame.display.flip()
 
+    def pauseFunction(self, stage):
+        if stage == 1:
+            my_font = pygame.font.SysFont('times new roman', 49)
+            pause_surface = my_font.render('Paused', True, (255, 255, 255))
+            pause_rect = pause_surface.get_rect()
+            pause_rect.midtop = (self.width/2, self.width/4)
+            self.surface.blit(pause_surface, pause_rect)
+            pygame.display.flip()
+        elif stage == 2:
+            self.surface.fill(self.black)
+            self.allBlocksDraw()
+            self.pause = False
+        
+
+
+    def allBlocksDraw(self):
+        for block in self.obj_blocks_list:
+            for x, y in block._cors:
+                pygame.draw.rect(self.surface, block.color, [x  * 40, y * 40, 39, 39])
+
     def main(self):
 
         pygame.init()
@@ -106,9 +127,14 @@ class Board:
 
         while not self.game_over:
 
+
             while self.game_restart:
                 self.restart()
                 for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_SPACE:
                             self.surfacePurifier()
@@ -136,14 +162,22 @@ class Board:
 
             while not self.touch_block:
 
+                while self.pause:
+                    self.pauseFunction(1)
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            pygame.quit()
+                            sys.exit()
+                        if event.type == pygame.KEYDOWN:
+                            if event.key == pygame.K_p:
+                                self.pauseFunction(2)
+
                 pygame.display.flip()
                 clock.tick(fps) 
 
                 if new_block.cantMove() or new_block.touchBlock(self.obj_blocks_list):
 
-                    for block in self.obj_blocks_list:
-                        for x, y in block._cors:
-                            pygame.draw.rect(self.surface, block.color, [x  * 40, y * 40, 39, 39])
+                    self.allBlocksDraw()
                       
                     self.obj_blocks_list.append(new_block)
                     self.touch_block = True
@@ -160,6 +194,8 @@ class Board:
                             new_block.cutBlocks(self.surface)
                             if not new_block.changeState(self.obj_blocks_list):
                                 new_block.drawBlocks(self.surface)
+                        elif event.key == pygame.K_p:
+                            self.pause = True
 
                 
                 if event.type == pygame.KEYDOWN:
@@ -175,8 +211,6 @@ class Board:
                             new_block.move(self.surface, 1)
 
                 
-                    
-
                 frame_count += 1
                 if frame_count == fps/7:
                     new_block.move(self.surface, direction)
