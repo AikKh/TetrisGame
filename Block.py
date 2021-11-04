@@ -8,6 +8,7 @@ class Block():
     def __init__(self, x, y):
         self.shape = random.randrange(7)
         self._cors = []
+        self._future_cors = []
         self.x = x
         self.y = y
         self.color = self.colors_list[random.randrange(7)]
@@ -54,6 +55,7 @@ class Block():
 
         for co in range(4):
             self._cors.append(shape_list[self.shape][self.state % 4][co])
+            self._future_cors.append(shape_list[self.shape][(self.state + 1) % 4][co])
 
         return self._cors
 
@@ -67,15 +69,18 @@ class Block():
                     return False
             for co in range(len(self._cors)):
                 self._cors[co] = (self._cors[co][0] + 1, self._cors[co][1])
+                self._future_cors[co] = (self._future_cors[co][0] + 1, self._future_cors[co][1])
         elif dir == 2:
             for co in range(len(self._cors)):
                 self._cors[co] = (self._cors[co][0], self._cors[co][1] + 1)
+                self._future_cors[co] = (self._future_cors[co][0], self._future_cors[co][1] + 1)
         elif dir == 3:
             for x, y in self._cors:
                 if x - 1 <= -1:
                     return False
             for co in range(4):
                 self._cors[co] = (self._cors[co][0] - 1, self._cors[co][1])
+                self._future_cors[co] = (self._future_cors[co][0] - 1, self._future_cors[co][1])
 
 
     def cutBlocks(self, surface):
@@ -95,7 +100,7 @@ class Block():
         for block in obj_blocks_list:
             for cor in block._cors: 
                 for new_cor in self._cors:
-                    if cor == (new_cor[0] + i, new_cor[1] + 1) or cor == (new_cor[0] + i, new_cor[1] - 1):
+                    if cor == (new_cor[0] + i, new_cor[1]):
                         return True
 
     def touchBlock(self, obj_blocks_list):
@@ -111,25 +116,27 @@ class Block():
             check_list.append((i, self.y))
         return check_list
 
-    def setColorToCor(self, cor):
-        pass
+    def turnAble(self, obj_blocks_list):
+        for co_x, co_y in self._future_cors:
+            if co_x >= 14 or co_x <= -1 or co_y >= 19:
+                return False
+
+        for future_cors in self._future_cors:
+            for block in obj_blocks_list:
+                for cors in block._cors:
+                    if future_cors == cors:
+                        return False
+
+        return True
 
     def changeState(self, obj_blocks_list):
-        if self.nearBlockTouch(obj_blocks_list, -1) or self.nearBlockTouch(obj_blocks_list, 1) or self.y > 17:
-            return False
-        x = self._cors[0][0]
-        y =  self._cors[0][1]
-        self.x = x
-        self.y = y
-        self._cors.clear()
-        self.state += 1
-        new_cors = self.blockMaker(self.x, self.y)
-        for co_x, co_y in new_cors:
-            if co_x >= 14 or co_x <= -1 or co_y >= 19:
-                self.state -= 1
-                self._cors.clear()
-                new_cors = self.blockMaker(self.x, self.y)
-        return True
+        if self.turnAble(obj_blocks_list):
+            self.x = self._cors[0][0]
+            self.y = self._cors[0][1]
+            self._cors.clear()
+            self._future_cors.clear()
+            self.state += 1
+            self._cors = self.blockMaker(self.x, self.y)
     
 
     def move(self, display, dir):

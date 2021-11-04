@@ -176,9 +176,8 @@ class Board:
                 clock.tick(fps) 
 
                 if new_block.cantMove() or new_block.touchBlock(self.obj_blocks_list):
-
+            
                     self.allBlocksDraw()
-                      
                     self.obj_blocks_list.append(new_block)
                     self.touch_block = True
                     continue
@@ -192,8 +191,8 @@ class Board:
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_SPACE:
                             new_block.cutBlocks(self.surface)
-                            if not new_block.changeState(self.obj_blocks_list):
-                                new_block.drawBlocks(self.surface)
+                            new_block.changeState(self.obj_blocks_list)
+                            new_block.drawBlocks(self.surface)
                         elif event.key == pygame.K_p:
                             self.pause = True
 
@@ -209,10 +208,19 @@ class Board:
                             pass
                         else:
                             new_block.move(self.surface, 1)
+                    elif event.key == pygame.K_DOWN:
+                        new_block.move(self.surface, 2)
+
+                if new_block.cantMove() or new_block.touchBlock(self.obj_blocks_list):
+        
+                    self.allBlocksDraw()
+                    self.obj_blocks_list.append(new_block)
+                    self.touch_block = True
+                    continue
 
                 
                 frame_count += 1
-                if frame_count == fps/7:
+                if frame_count == 5:
                     new_block.move(self.surface, direction)
                     frame_count = 0
                 
