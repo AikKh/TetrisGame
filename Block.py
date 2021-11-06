@@ -3,7 +3,7 @@ import random
 
 class Block():
     
-    colors_list = [(0, 255, 0), (255, 0, 0), (0, 0, 255), (255, 128, 0), (255, 0, 127), (51, 255, 255), (153, 51, 255)]
+    colors_list = [(0, 255, 0), (255, 0, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255), (153, 51, 255)]
 
     def __init__(self, x, y):
         self.shape = random.randrange(7)
@@ -11,7 +11,7 @@ class Block():
         self._future_cors = []
         self.x = x
         self.y = y
-        self.color = self.colors_list[random.randrange(7)]
+        self.color = self.colors_list[self.shape]
         self.state = 0
 
     def blockMaker(self, x, y):
@@ -61,6 +61,9 @@ class Block():
 
 
     def moveCors(self, dir):
+        y = 0
+        next_y = 0
+
         if self.x == -1 or self.x == 14:
             return 
         elif dir == 1:
@@ -71,9 +74,20 @@ class Block():
                 self._cors[co] = (self._cors[co][0] + 1, self._cors[co][1])
                 self._future_cors[co] = (self._future_cors[co][0] + 1, self._future_cors[co][1])
         elif dir == 2:
-            for co in range(len(self._cors)):
+            for co in range(len(self._cors)):             
+                y = self._cors[co][1]
+
+                try:
+                    next_y = self._cors[co + 1][1] 
+                except:
+                    next_y = self._cors[co][1] 
+
+                if next_y - y <= -2:
+                    continue
+
                 self._cors[co] = (self._cors[co][0], self._cors[co][1] + 1)
-                self._future_cors[co] = (self._future_cors[co][0], self._future_cors[co][1] + 1)
+                self._future_cors[co] = (self._future_cors[co][0], self._future_cors[co][1] + 1)  
+                
         elif dir == 3:
             for x, y in self._cors:
                 if x - 1 <= -1:

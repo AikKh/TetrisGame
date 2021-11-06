@@ -33,7 +33,7 @@ class Board:
             minY = 0
 
         full_liens = []
-#eeeee
+
         for i in range(minY, maxY):
             x_array = []
             for block in self.obj_blocks_list:
@@ -56,7 +56,6 @@ class Board:
             for block in self.obj_blocks_list:
                 for x, y in block._cors:
                     if line == y:
-                        pygame.draw.rect(self.surface, (0, 0, 0), [x  * 40, y * 40, 40, 40])
                         cut_list.append((x, y))
 
         for cut_cor in cut_list:
@@ -64,21 +63,51 @@ class Board:
                     for cors in block._cors:
                         if cut_cor == cors:
                             block._cors.remove(cut_cor)
+                            
+
 
         return lines
 
+    def getMoveCount(self, lines, cors):
+        count = 0
+        for line in lines:
+            for x, y in cors:
+                if line > y:
+                    count += 1
+                    break
+        return count
+
+    def unitedBlocks(self, block):
+        Y_list = []
+
+        for x, y in block._cors:
+             Y_list.append(y)
+
+        for i in range(len(Y_list)):
+            if Y_list[(i + 1)%(len(Y_list - 1))] - Y_list[(i)%(len(Y_list - 1))] >= 2:
+                block._cors[i + 1] = (block._cors[i + 1][0], block._cors[i + 1][1] - 1)
+
+
     def allBlocksMoveDown(self, lines):
-        if lines != []:
-            for block in self.obj_blocks_list:
-                for x, y in block._cors:
-                    if y < lines[0]:
-                        for i in range(len(lines)):
-                            block.move(self.surface, 2)
-                        break
+        for block in self.obj_blocks_list:
+            for x, y in block._cors:
+                if y < lines[-1]:
+                    for i in range(self.getMoveCount(lines, block._cors)):
+                        block.move(self.surface, 2)
+                    break
+
+    def cutAnimation(self, lines):
+        for line in lines:
+            for x in range(14):
+                pygame.draw.rect(self.surface, (0, 0, 0), [x  * 40, line * 40, 40, 40])
+                pygame.draw.rect(self.surface, (255, 255, 255), [(x + 1)  * 40, line * 40, 40, 40])
+                pygame.display.flip()
+                time.sleep(0.05)
 
     def surfacePurifier(self):
         self.surface.fill((0, 0, 0))
         self.obj_blocks_list = []
+        
 
     def restart(self):
         my_font = pygame.font.SysFont('times new roman', 49)
@@ -144,8 +173,9 @@ class Board:
                             self.game_over = True
 
             lines = self.linesToRemove()
-
-            self.allBlocksMoveDown(lines)
+            if lines != []:
+                self.cutAnimation(lines)
+                self.allBlocksMoveDown(lines)
 
             for block in self.obj_blocks_list:
                 for cor in block._cors:
@@ -169,7 +199,7 @@ class Board:
                             pygame.quit()
                             sys.exit()
                         if event.type == pygame.KEYDOWN:
-                            if event.key == pygame.K_p:
+                            if event.key == pygame.K_p or event.key == pygame.K_SPACE:
                                 self.pauseFunction(2)
 
                 pygame.display.flip()
@@ -189,7 +219,7 @@ class Board:
                         sys.exit()
 
                     if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_SPACE:
+                        if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
                             new_block.cutBlocks(self.surface)
                             new_block.changeState(self.obj_blocks_list)
                             new_block.drawBlocks(self.surface)
